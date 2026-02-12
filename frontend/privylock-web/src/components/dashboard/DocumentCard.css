@@ -1,0 +1,270 @@
+/* DocumentCard.css - WITH GOOGLE DRIVE STYLE MENU */
+
+.document-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: all 0.3s;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.document-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  transform: translateY(-2px);
+}
+
+.document-icon {
+  font-size: 48px;
+  text-align: center;
+  padding: 10px 0;
+}
+
+.document-info {
+  flex: 1;
+}
+
+.document-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 8px 0;
+  word-break: break-word;
+}
+
+.document-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.doc-type {
+  font-size: 13px;
+  color: #666;
+}
+
+.separator {
+  color: #ccc;
+}
+
+.file-size {
+  font-size: 13px;
+  color: #999;
+}
+
+.document-description {
+  font-size: 14px;
+  color: #666;
+  margin: 8px 0;
+  line-height: 1.5;
+}
+
+.document-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.upload-date {
+  font-size: 12px;
+  color: #999;
+}
+
+.category-badge {
+  font-size: 12px;
+  padding: 4px 10px;
+  background: #e3f2fd;
+  color: #1976d2;
+  border-radius: 12px;
+}
+
+/* ✅ NEW: Three-dot menu */
+.document-menu-container {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+}
+
+.btn-menu {
+  background: rgba(0,0,0,0.05);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.btn-menu:hover {
+  background: rgba(0,0,0,0.1);
+}
+
+/* ✅ NEW: Dropdown menu */
+.document-dropdown-menu {
+  position: absolute;
+  top: 40px;
+  right: 0;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  min-width: 180px;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.menu-item {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: #333;
+  transition: background 0.2s;
+  text-align: left;
+}
+
+.menu-item:hover {
+  background: #f5f5f5;
+}
+
+.menu-item.danger {
+  color: #d32f2f;
+}
+
+.menu-item.danger:hover {
+  background: #ffebee;
+}
+
+.menu-icon {
+  font-size: 16px;
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-divider {
+  height: 1px;
+  background: #e0e0e0;
+  margin: 4px 0;
+}
+
+/* Original action buttons */
+.document-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.btn-action {
+  flex: 1;
+  min-width: 80px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn-view {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.btn-view:hover {
+  background: #bbdefb;
+}
+
+.btn-download {
+  background: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.btn-download:hover {
+  background: #e1bee7;
+}
+
+.btn-delete {
+  background: #ffebee;
+  color: #d32f2f;
+}
+
+.btn-delete:hover {
+  background: #ffcdd2;
+}
+
+/* ✅ NEW: Small modals for move/rename */
+.small-modal {
+  max-width: 500px;
+}
+
+.folder-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 15px;
+}
+
+.folder-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.folder-option:hover:not(:disabled) {
+  border-color: #2196f3;
+  background: #f0f8ff;
+}
+
+.folder-option:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.current-badge {
+  margin-left: auto;
+  font-size: 11px;
+  padding: 3px 8px;
+  background: #4caf50;
+  color: white;
+  border-radius: 10px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .document-actions {
+    flex-direction: column;
+  }
+
+  .btn-action {
+    width: 100%;
+  }
+}

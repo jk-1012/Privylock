@@ -1,0 +1,252 @@
+/**
+ * Upload Modal Styles
+ */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--spacing-lg);
+}
+
+.modal-content {
+  background-color: var(--bg-primary);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* Modal Header */
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-lg) var(--spacing-xl);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header h2 {
+  font-size: 24px;
+  color: var(--text-primary);
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 32px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.btn-close:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+/* Modal Body */
+.modal-content form {
+  padding: var(--spacing-xl);
+}
+
+/* File Drop Zone */
+.file-drop-zone {
+  border: 3px dashed var(--border-color);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-lg);
+  text-align: center;
+  transition: all 0.2s ease;
+  background-color: var(--bg-secondary);
+}
+
+.file-drop-zone.active {
+  border-color: var(--primary-color);
+  background-color: rgba(37, 99, 235, 0.05);
+}
+
+.file-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.upload-icon {
+  font-size: 48px;
+  opacity: 0.5;
+}
+
+.file-prompt p {
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.or-text {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin: var(--spacing-sm) 0;
+}
+
+.btn-select-file {
+  padding: 10px 24px;
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-select-file:hover {
+  background-color: var(--primary-hover);
+}
+
+.file-hint {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* File Selected State */
+.file-selected {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background-color: var(--bg-primary);
+  border-radius: var(--border-radius);
+}
+
+.file-icon {
+  font-size: 32px;
+}
+
+.file-info {
+  flex: 1;
+  text-align: left;
+}
+
+.file-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.file-size {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.btn-remove {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.btn-remove:hover {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+/* Upload Progress */
+.upload-progress {
+  margin: var(--spacing-lg) 0;
+}
+
+.progress-bar {
+  height: 8px;
+  background-color: var(--bg-tertiary);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: var(--spacing-sm);
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-color), var(--success-color));
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Modal Actions */
+.modal-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--border-color);
+}
+
+.modal-actions button {
+  flex: 1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .modal-content {
+    max-height: 95vh;
+  }
+
+  .modal-content form {
+    padding: var(--spacing-lg);
+  }
+
+  .file-drop-zone {
+    padding: var(--spacing-lg);
+  }
+}
+
+
+.upload-context {
+  background: #e3f2fd;
+  padding: 12px 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  border-left: 4px solid #2196f3;
+}
+
+.upload-context small {
+  display: block;
+  color: #666;
+  font-size: 11px;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.context-path {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1976d2;
+}
