@@ -1,0 +1,1 @@
+web: gunicorn privylock_backend.wsgi

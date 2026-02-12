@@ -1,6 +1,7 @@
 /**
  * apiService.js - API Service for PrivyLock
  *
+ * ✅ PRODUCTION READY - ESLint compliant
  * FEATURES:
  * ✅ Authentication (register, login, Google OAuth)
  * ✅ Email Verification (no mobile OTP)
@@ -542,5 +543,6 @@ class ApiService {
   }
 }
 
-// Export singleton instance
-export default new ApiService();
+// ✅ FIXED: Export singleton instance with variable name (ESLint compliant)
+const apiService = new ApiService();
+export default apiService;

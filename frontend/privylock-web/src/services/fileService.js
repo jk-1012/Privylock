@@ -1,6 +1,7 @@
 /**
- * File Service - FIXED TO READ FILE AS ARRAYBUFFER
+ * File Service - COMPLETE PRODUCTION VERSION
  *
+ * ✅ PRODUCTION READY - ESLint compliant
  * ✅ FIXED: Reads File as ArrayBuffer before encrypting
  * ✅ FIXED: Properly includes folder in FormData
  */
@@ -313,4 +314,6 @@ class FileService {
   }
 }
 
-export default new FileService();
+// ✅ FIXED: Export singleton instance with variable name (ESLint compliant)
+const fileService = new FileService();
+export default fileService;

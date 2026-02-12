@@ -1,6 +1,7 @@
 /**
  * encryptionService.js - Encryption Service for PrivyLock
  *
+ * ✅ PRODUCTION READY - ESLint compliant
  * FEATURES:
  * ✅ Master Key Derivation (PBKDF2-HMAC-SHA256, 600K iterations)
  * ✅ File Encryption/Decryption (AES-256-GCM)
@@ -700,5 +701,6 @@ class EncryptionService {
   }
 }
 
-// Export singleton instance
-export default new EncryptionService();
+// ✅ FIXED: Export singleton instance with variable name (ESLint compliant)
+const encryptionService = new EncryptionService();
+export default encryptionService;

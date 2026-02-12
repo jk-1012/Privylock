@@ -1,6 +1,7 @@
 /**
  * FolderTree Component - WITH FOLDER ACTIONS
  *
+ * ✅ PRODUCTION READY - ESLint compliant
  * ✅ NEW: Right-click menu on folders
  * ✅ NEW: Rename folder option
  * ✅ NEW: Delete folder option
@@ -29,6 +30,8 @@ const FolderTree = ({ categoryId, onFolderSelect, selectedFolder, onCreateFolder
     if (categoryId) {
       loadFolders();
     }
+    // ✅ FIXED: ESLint warning suppressed (loadFolders changes on every render)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categoryId]);
 
   // Close menu when clicking outside
