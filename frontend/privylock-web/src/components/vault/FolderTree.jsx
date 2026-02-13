@@ -2,13 +2,14 @@
  * FolderTree Component - WITH FOLDER ACTIONS
  *
  * ✅ PRODUCTION READY - ESLint compliant
+ * ✅ FIXED: loadFolders wrapped in useCallback
  * ✅ NEW: Right-click menu on folders
  * ✅ NEW: Rename folder option
  * ✅ NEW: Delete folder option
  * ✅ NEW: Three-dot menu for each folder
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import apiService from '../../services/apiService';
 import encryptionService from '../../services/encryptionService';
 import './FolderTree.css';
@@ -26,14 +27,6 @@ const FolderTree = ({ categoryId, onFolderSelect, selectedFolder, onCreateFolder
 
   const menuRef = useRef(null);
 
-  useEffect(() => {
-    if (categoryId) {
-      loadFolders();
-    }
-    // ✅ FIXED: ESLint warning suppressed (loadFolders changes on every render)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [categoryId, loadFolders]);
-
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -49,9 +42,34 @@ const FolderTree = ({ categoryId, onFolderSelect, selectedFolder, onCreateFolder
   }, []);
 
   /**
-   * Load and decrypt folders
+   * Build hierarchical tree
    */
-  const loadFolders = async () => {
+  const buildTree = useCallback((folders) => {
+    const map = {};
+    const tree = [];
+
+    folders.forEach(folder => {
+      map[folder.id] = { ...folder, children: [] };
+    });
+
+    folders.forEach(folder => {
+      if (folder.parent) {
+        if (map[folder.parent]) {
+          map[folder.parent].children.push(map[folder.id]);
+        }
+      } else {
+        tree.push(map[folder.id]);
+      }
+    });
+
+    return tree;
+  }, []);
+
+  /**
+   * Load and decrypt folders
+   * ✅ FIXED: Wrapped in useCallback to prevent dependency issues
+   */
+  const loadFolders = useCallback(async () => {
     try {
       setLoading(true);
       console.log('📁 Loading folders for category:', categoryId);
@@ -98,31 +116,13 @@ const FolderTree = ({ categoryId, onFolderSelect, selectedFolder, onCreateFolder
     } finally {
       setLoading(false);
     }
-  };
+  }, [categoryId, buildTree]);
 
-  /**
-   * Build hierarchical tree
-   */
-  const buildTree = (folders) => {
-    const map = {};
-    const tree = [];
-
-    folders.forEach(folder => {
-      map[folder.id] = { ...folder, children: [] };
-    });
-
-    folders.forEach(folder => {
-      if (folder.parent) {
-        if (map[folder.parent]) {
-          map[folder.parent].children.push(map[folder.id]);
-        }
-      } else {
-        tree.push(map[folder.id]);
-      }
-    });
-
-    return tree;
-  };
+  useEffect(() => {
+    if (categoryId) {
+      loadFolders();
+    }
+  }, [categoryId, loadFolders]);
 
   /**
    * Toggle folder expand/collapse

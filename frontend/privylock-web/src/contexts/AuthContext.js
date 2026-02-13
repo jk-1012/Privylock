@@ -2,6 +2,7 @@
  * AuthContext.js - COMPLETE FIXED VERSION
  *
  * ✅ PRODUCTION READY - ESLint compliant
+ * ✅ FIXED: Removed unused saltHex variable in register function
  * FIXES APPLIED:
  * ✅ Proper Google OAuth error handling (no [object Object])
  * ✅ Google users get deterministic master key (email-based)
@@ -147,6 +148,7 @@ export const AuthProvider = ({ children }) => {
    * Register new user
    *
    * ✅ NO AUTO-LOGIN! User must verify email and login manually.
+   * ✅ FIXED: Removed unused saltHex variable
    */
   const register = async (email, mobileNumber, password) => {
     try {
@@ -156,19 +158,11 @@ export const AuthProvider = ({ children }) => {
       // Normalize email
       const normalizedEmail = email.toLowerCase().trim();
 
-      // Generate salt from email hash (deterministic)
+      // Generate username from email hash
       const emailHash = await encryptionService.hashPassword(normalizedEmail);
-      const saltHex = emailHash.substring(0, 32);
-
-      console.log('🔐 Salt generated from email');
-
-      // ✅ FIXED: Removed unused masterKey variable (ESLint warning)
-      // Derive master key (for verification only)
-      // const masterKey = await encryptionService.deriveMasterKey(password, saltBytes);
-      // console.log('🔑 Master key derived (not stored yet)');
-
-      // Generate username
       const username = emailHash.substring(0, 30);
+
+      console.log('🔐 Username generated from email');
 
       // Hash password
       const passwordHash = await encryptionService.hashPassword(password);
