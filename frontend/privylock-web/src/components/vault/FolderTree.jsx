@@ -32,7 +32,7 @@ const FolderTree = ({ categoryId, onFolderSelect, selectedFolder, onCreateFolder
     }
     // ✅ FIXED: ESLint warning suppressed (loadFolders changes on every render)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [categoryId]);
+  }, [categoryId, loadFolders]);
 
   // Close menu when clicking outside
   useEffect(() => {

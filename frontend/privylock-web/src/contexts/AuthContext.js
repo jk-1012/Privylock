@@ -159,7 +159,6 @@ export const AuthProvider = ({ children }) => {
       // Generate salt from email hash (deterministic)
       const emailHash = await encryptionService.hashPassword(normalizedEmail);
       const saltHex = emailHash.substring(0, 32);
-      const saltBytes = encryptionService.hexToUint8Array(saltHex);
 
       console.log('🔐 Salt generated from email');
 
