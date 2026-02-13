@@ -31,6 +31,13 @@ DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '.onrender.com',  # Allow all Render domains
+]
+
+
 
 # Application definition
 
@@ -177,7 +184,7 @@ SIMPLE_JWT = {
 # CORS settings (allow Flutter app to connect)
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-    os.getenv("FRONTEND_URL"),
+    "https://your-frontend.vercel.app",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
