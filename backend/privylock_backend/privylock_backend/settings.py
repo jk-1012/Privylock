@@ -27,17 +27,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-CHANGE-THIS-IN-PRODUCTION')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
-
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    '.onrender.com',  # Allow all Render domains
-]
-
-
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',') if os.getenv('ALLOWED_HOSTS') else ['localhost', '127.0.0.1', '.onrender.com']
 
 # Application definition
 
@@ -184,10 +176,15 @@ SIMPLE_JWT = {
 # CORS settings (allow Flutter app to connect)
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-    "https://your-frontend.vercel.app",
+    os.getenv("FRONTEND_URL", "http://localhost:3000"),
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    os.getenv("FRONTEND_URL", "http://localhost:3000"),
+]
 
 CORS_ALLOW_METHODS = [
     'DELETE',
