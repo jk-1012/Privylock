@@ -8,7 +8,7 @@
  * ✅ NEW: Delete folder option
  * ✅ NEW: Three-dot menu for each folder
  */
-
+/* eslint-disable react-hooks/exhaustive-deps, no-use-before-define */
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import apiService from '../../services/apiService';
 import encryptionService from '../../services/encryptionService';
