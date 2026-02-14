@@ -83,6 +83,8 @@ def register(request):
             try:
                 send_verification_email(user, user.email_verification_token)
                 logger.info(f"📧 Verification email sent to: {user.email}")
+                if not email_sent:
+                    logger.warning(f"⚠️ Email not sent but registration completed for {user.email}")
             except Exception as e:
                 logger.error(f"❌ Failed to send verification email: {e}")
 
