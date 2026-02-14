@@ -93,16 +93,16 @@ const Login = () => {
         errorMessage = err;
       }
 
-      // Handle specific error types
-      if (errorMessage.includes('verify') || errorMessage.includes('verification')) {
-        setError(
-          'Please verify your email before logging in. Check your inbox for the verification link.'
-        );
-      } else if (errorMessage.includes('Invalid') || errorMessage.includes('credentials')) {
-        setError('Invalid email or password. Please try again.');
-      } else {
-        setError(errorMessage);
-      }
+          // Handle specific error types
+    if (errorMessage.toLowerCase().includes('invalid credentials')) {
+      setError('Invalid email or password. Please check and try again.');
+    } else if (errorMessage.toLowerCase().includes('verify email')) {
+      setError('Please verify your email before logging in. Check your inbox for the verification link.');
+    } else if (errorMessage.toLowerCase().includes('forbidden') || errorMessage.toLowerCase().includes('403')) {
+      setError('Please verify your email before logging in. Check your inbox for the verification link.');
+    } else {
+      setError(errorMessage);
+    }
     } finally {
       setLoading(false);
     }
@@ -140,37 +140,51 @@ const Login = () => {
     } catch (err) {
       console.error('❌ Google login failed:', err);
 
-      // ✅ Comprehensive error message extraction
-      let errorMessage = 'Google sign-in failed. Please try again.';
+        // ✅ FIXED: Comprehensive error message extraction
+    let errorMessage = 'Google sign-in failed. Please try again.';
 
-      // Try to extract from error object
-      if (err.response?.data) {
-        const data = err.response.data;
+    console.log('🔍 Error object:', err);
+    console.log('🔍 Error response:', err.response);
+    console.log('🔍 Error response data:', err.response?.data);
 
-        if (typeof data === 'string') {
-          errorMessage = data;
-        } else if (data.error) {
-          errorMessage = data.error;
-        } else if (data.message) {
-          errorMessage = data.message;
-        } else if (data.detail) {
-          errorMessage = data.detail;
-        } else if (typeof data === 'object') {
-          const firstError = Object.values(data)[0];
-          if (typeof firstError === 'string') {
-            errorMessage = firstError;
-          } else if (Array.isArray(firstError) && firstError.length > 0) {
-            errorMessage = firstError[0];
-          }
+    // Try to extract from error object
+    if (err.response?.data) {
+      const data = err.response.data;
+
+      if (typeof data === 'string') {
+        errorMessage = data;
+      } else if (data.mobile_number) {
+        // Mobile number validation error
+        errorMessage = Array.isArray(data.mobile_number) 
+          ? data.mobile_number[0] 
+          : data.mobile_number;
+      } else if (data.error) {
+        errorMessage = data.error;
+      } else if (data.message) {
+        errorMessage = data.message;
+      } else if (data.detail) {
+        errorMessage = data.detail;
+      } else if (data.non_field_errors) {
+        errorMessage = Array.isArray(data.non_field_errors)
+          ? data.non_field_errors[0]
+          : data.non_field_errors;
+      } else if (typeof data === 'object') {
+        // Get first error from object
+        const entries = Object.entries(data);
+        if (entries.length > 0) {
+          const [key, value] = entries[0];
+          const msg = Array.isArray(value) ? value[0] : value;
+          errorMessage = `${key}: ${msg}`;
         }
-      } else if (err.message) {
-        errorMessage = err.message;
-      } else if (typeof err === 'string') {
-        errorMessage = err;
       }
+    } else if (err.message) {
+      errorMessage = err.message;
+    } else if (typeof err === 'string') {
+      errorMessage = err;
+    }
 
-      console.error('📝 Displaying error:', errorMessage);
-      setError(errorMessage);
+    console.error('📝 Displaying error:', errorMessage);
+    setError(errorMessage);
     } finally {
       setLoading(false);
     }
