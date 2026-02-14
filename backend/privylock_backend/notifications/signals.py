@@ -70,9 +70,8 @@ def create_new_device_notification(sender, instance, created, **kwargs):
         try:
             NotificationCreator.create_security_alert(
                 user=instance.user,
-                device=instance,
-                alert_type='NEW_DEVICE',
-                preferences=prefs
+                alert_message=f"New device login: {instance.device_name}",
+                device_info={'device': instance.device_name}
             )
         except Exception as e:
             logger.error(f"❌ Failed to create device notification: {str(e)}")
