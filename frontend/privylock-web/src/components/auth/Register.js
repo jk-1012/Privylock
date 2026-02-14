@@ -1,18 +1,10 @@
 /**
- * Register Component - FIXED
+ * Register Component - COMPLETE FIX
  *
  * FIXES APPLIED:
- * ✅ After saving recovery key → Redirect to LOGIN page (not dashboard)
- * ✅ User must login manually after registration
- * ✅ Proper email verification flow
- *
- * CORRECT FLOW:
- * 1. Fill registration form
- * 2. Click "Create Account"
- * 3. See recovery key modal
- * 4. Save recovery key
- * 5. → Redirect to LOGIN page ← FIXED!
- * 6. User must login with verified email
+ * ✅ Proper error extraction from backend response
+ * ✅ After saving recovery key → Redirect to LOGIN page
+ * ✅ Better validation error messages
  */
 
 import React, { useState } from 'react';
@@ -87,62 +79,57 @@ const Register = () => {
       setShowRecoveryKey(true);
 
     } catch (err) {
-  console.error('❌ Registration failed:', err);
-  console.error('Full error:', JSON.stringify(err, null, 2));
-  
-  let errorMessage = 'Registration failed. Please try again.';
-  
-  // Try to extract detailed error
-  if (err.response?.data) {
-    const data = err.response.data;
-    console.log('Error data:', data);
-    
-    // Check different error formats
-    if (typeof data === 'string') {
-      errorMessage = data;
-    } else if (data.errors) {
-      // Django REST Framework validation errors
-      const errors = data.errors;
+      console.error('❌ Registration failed:', err);
+      console.error('Full error object:', err);
+      console.error('Error response:', err.response);
+      console.error('Error response data:', err.response?.data);
       
-      // Get first error message
-      const firstKey = Object.keys(errors)[0];
-      const firstError = errors[firstKey];
+      let errorMessage = 'Registration failed. Please try again.';
       
-      if (Array.isArray(firstError)) {
-        errorMessage = `${firstKey}: ${firstError[0]}`;
-      } else {
-        errorMessage = `${firstKey}: ${firstError}`;
+      if (err.response?.data) {
+        const data = err.response.data;
+        console.log('📋 Error data type:', typeof data);
+        console.log('📋 Error data:', data);
+        
+        // Handle different error formats
+        if (typeof data === 'string') {
+          errorMessage = data;
+        } else if (data.errors) {
+          // Django validation errors format
+          const firstKey = Object.keys(data.errors)[0];
+          const firstValue = data.errors[firstKey];
+          errorMessage = Array.isArray(firstValue) ? firstValue[0] : firstValue;
+        } else if (data.username) {
+          const msg = Array.isArray(data.username) ? data.username[0] : data.username;
+          errorMessage = msg.includes('user with this email') ? 'This email is already registered' : msg;
+        } else if (data.email) {
+          errorMessage = Array.isArray(data.email) ? data.email[0] : data.email;
+        } else if (data.mobile_number) {
+          errorMessage = Array.isArray(data.mobile_number) ? data.mobile_number[0] : data.mobile_number;
+        } else if (data.password) {
+          errorMessage = Array.isArray(data.password) ? data.password[0] : data.password;
+        } else if (data.error) {
+          errorMessage = data.error;
+        } else if (data.detail) {
+          errorMessage = data.detail;
+        } else if (data.message) {
+          errorMessage = data.message;
+        } else {
+          // Last resort - show first field error
+          const keys = Object.keys(data);
+          if (keys.length > 0) {
+            const firstKey = keys[0];
+            const firstValue = data[firstKey];
+            const msg = Array.isArray(firstValue) ? firstValue[0] : firstValue;
+            errorMessage = `${firstKey}: ${msg}`;
+          }
+        }
+      } else if (err.message) {
+        errorMessage = err.message;
       }
-    } else if (data.username) {
-      errorMessage = Array.isArray(data.username) ? data.username[0] : data.username;
-    } else if (data.email) {
-      errorMessage = Array.isArray(data.email) ? data.email[0] : data.email;
-    } else if (data.mobile_number) {
-      errorMessage = Array.isArray(data.mobile_number) ? data.mobile_number[0] : data.mobile_number;
-    } else if (data.password) {
-      errorMessage = Array.isArray(data.password) ? data.password[0] : data.password;
-    } else if (data.error) {
-      errorMessage = data.error;
-    } else if (data.detail) {
-      errorMessage = data.detail;
-    } else if (data.message) {
-      errorMessage = data.message;
-    } else {
-      // Show all errors as a list
-      const allErrors = Object.entries(data)
-        .map(([key, value]) => {
-          const msg = Array.isArray(value) ? value[0] : value;
-          return `${key}: ${msg}`;
-        })
-        .join('\n');
-      errorMessage = allErrors;
-    }
-  } else if (err.message) {
-    errorMessage = err.message;
-  }
-  
-  console.error('📝 Displaying error:', errorMessage);
-  setError(errorMessage);
+      
+      console.error('📝 Final error message:', errorMessage);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -151,14 +138,18 @@ const Register = () => {
   /**
    * Handle Google OAuth
    */
-  const handleGoogleSuccess = async (response) => {
+  const handleGoogleSuccess = async (credentialResponse) => {
     try {
       setLoading(true);
       setError('');
 
       console.log('🌐 Google Sign-In successful');
 
-      await googleLogin(response.tokenId);
+      if (!credentialResponse.credential) {
+        throw new Error('No credential received from Google');
+      }
+
+      await googleLogin(credentialResponse.credential);
 
       console.log('✅ Google registration successful!');
 
@@ -167,14 +158,45 @@ const Register = () => {
 
     } catch (err) {
       console.error('❌ Google registration failed:', err);
-      setError(err.message || 'Google sign-in failed.');
+      console.error('Error response data:', err.response?.data);
+      
+      let errorMessage = 'Google sign-in failed. Please try again.';
+      
+      if (err.response?.data) {
+        const data = err.response.data;
+        
+        if (typeof data === 'string') {
+          errorMessage = data;
+        } else if (data.mobile_number) {
+          const msg = Array.isArray(data.mobile_number) ? data.mobile_number[0] : data.mobile_number;
+          errorMessage = msg;
+        } else if (data.error) {
+          errorMessage = data.error;
+        } else if (data.detail) {
+          errorMessage = data.detail;
+        } else if (data.message) {
+          errorMessage = data.message;
+        } else if (typeof data === 'object') {
+          const keys = Object.keys(data);
+          if (keys.length > 0) {
+            const firstKey = keys[0];
+            const firstValue = data[firstKey];
+            const msg = Array.isArray(firstValue) ? firstValue[0] : firstValue;
+            errorMessage = typeof msg === 'string' ? msg : `${firstKey}: ${JSON.stringify(msg)}`;
+          }
+        }
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGoogleFailure = (error) => {
-    console.error('❌ Google Sign-In error:', error);
+  const handleGoogleFailure = () => {
+    console.error('❌ Google Sign-In error');
     setError('Google sign-in failed. Please try email registration.');
   };
 
@@ -200,7 +222,7 @@ const Register = () => {
   };
 
   /**
-   * ✅ FIX: Redirect to LOGIN page after saving recovery key
+   * Redirect to LOGIN page after saving recovery key
    */
   const confirmRecoveryKeySaved = () => {
     if (!recoveryKeySaved) {
@@ -208,13 +230,10 @@ const Register = () => {
       return;
     }
 
-    // ✅ FIXED: Navigate to LOGIN page (not dashboard, not verification page)
     console.log('✅ Recovery key saved, redirecting to login...');
 
-    // Show success message
     alert('Registration successful! Please check your email to verify your account, then login.');
 
-    // Redirect to login page
     navigate('/login', {
       state: {
         message: 'Registration successful! Please verify your email (check inbox) and login.',
@@ -336,12 +355,13 @@ const Register = () => {
             {/* Google OAuth */}
             <div className="google-signin">
               <GoogleLogin
-                clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}
-                buttonText="Sign up with Google"
                 onSuccess={handleGoogleSuccess}
-                onFailure={handleGoogleFailure}
-                cookiePolicy={'single_host_origin'}
-                disabled={loading}
+                onError={handleGoogleFailure}
+                text="signup_with"
+                shape="rectangular"
+                size="large"
+                theme="outline"
+                logo_alignment="left"
               />
             </div>
 
@@ -390,7 +410,6 @@ const Register = () => {
               </label>
             </div>
 
-            {/* ✅ FIXED: Button text and action */}
             <button
               onClick={confirmRecoveryKeySaved}
               className="btn-primary"

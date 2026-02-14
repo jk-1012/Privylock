@@ -294,6 +294,10 @@ class GoogleLoginSerializer(serializers.Serializer):
 
     def validate(self, data):
         """Check if mobile_number is required."""
+        import hashlib
+        import logging
+        
+        logger = logging.getLogger(__name__)
         google_info = self.context.get('google_user_info', {})
 
         # Check if user exists
@@ -303,11 +307,14 @@ class GoogleLoginSerializer(serializers.Serializer):
         if not existing_user and google_info.get('email'):
             existing_user = User.objects.filter(email=google_info['email']).first()
 
-        # If new user, mobile_number is REQUIRED
+        # If new user without mobile, generate placeholder
         if not existing_user and not data.get('mobile_number'):
-            raise serializers.ValidationError({
-                'mobile_number': 'Mobile number is required for new users'
-            })
+            # Generate placeholder mobile number from Google ID
+            google_id_hash = hashlib.md5(google_info['google_id'].encode()).hexdigest()
+            # Convert hex to numeric (replace letters with numbers)
+            placeholder = f"+{google_id_hash[:12].replace('a', '1').replace('b', '2').replace('c', '3').replace('d', '4').replace('e', '5').replace('f', '6')}"
+            data['mobile_number'] = placeholder
+            logger.info(f"  → Generated placeholder mobile for Google user: {placeholder}")
 
         # Validate mobile format if provided
         if data.get('mobile_number'):

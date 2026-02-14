@@ -1,10 +1,10 @@
 /**
- * Login Component - USING MODERN @react-oauth/google
+ * Login Component - COMPLETE FIX
  *
  * FIXES APPLIED:
- * ✅ Using @react-oauth/google library correctly
- * ✅ Proper error message extraction (no [object Object])
- * ✅ Modern Google Identity Services
+ * ✅ Proper error extraction from backend response
+ * ✅ Fixed "verify email" showing for non-existent users
+ * ✅ Fixed [object Object] error for Google login
  * ✅ Better error handling
  */
 
@@ -30,7 +30,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   /**
-   * ✅ If already logged in, redirect to dashboard
+   * If already logged in, redirect to dashboard
    */
   useEffect(() => {
     if (!authLoading && user) {
@@ -72,45 +72,57 @@ const Login = () => {
     try {
       console.log('🔐 Logging in with email...');
 
-      // Call login from AuthContext
       await login(email, password);
 
       console.log('✅ Login successful!');
       console.log('🔄 Redirecting to dashboard...');
 
-      // Redirect to dashboard
       navigate('/dashboard', { replace: true });
 
     } catch (err) {
       console.error('❌ Login failed:', err);
+      console.error('Error response:', err.response);
+      console.error('Error response data:', err.response?.data);
 
-      // Extract error message
       let errorMessage = 'Login failed. Please try again.';
 
-      if (err.message) {
+      if (err.response?.data) {
+        const data = err.response.data;
+        
+        if (typeof data === 'string') {
+          errorMessage = data;
+        } else if (data.detail) {
+          errorMessage = data.detail;
+        } else if (data.error) {
+          errorMessage = data.error;
+        } else if (data.message) {
+          errorMessage = data.message;
+        }
+      } else if (err.message) {
         errorMessage = err.message;
       } else if (typeof err === 'string') {
         errorMessage = err;
       }
 
-          // Handle specific error types
-    if (errorMessage.toLowerCase().includes('invalid credentials')) {
-      setError('Invalid email or password. Please check and try again.');
-    } else if (errorMessage.toLowerCase().includes('verify email')) {
-      setError('Please verify your email before logging in. Check your inbox for the verification link.');
-    } else if (errorMessage.toLowerCase().includes('forbidden') || errorMessage.toLowerCase().includes('403')) {
-      setError('Please verify your email before logging in. Check your inbox for the verification link.');
-    } else {
-      setError(errorMessage);
-    }
+      console.error('📝 Final error message:', errorMessage);
+
+      // Handle specific error types based on ACTUAL error message
+      const lowerMsg = errorMessage.toLowerCase();
+      
+      if (lowerMsg.includes('verify') && lowerMsg.includes('email')) {
+        setError('Please verify your email before logging in. Check your inbox for the verification link.');
+      } else if (lowerMsg.includes('invalid credentials') || lowerMsg.includes('invalid email')) {
+        setError('Invalid email or password. Please try again.');
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
   };
 
   /**
-   * ✅ FIXED: Handle Google OAuth Success
-   * Using @react-oauth/google correctly
+   * Handle Google OAuth Success
    */
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
@@ -121,78 +133,77 @@ const Login = () => {
       console.log('🌐 Google Sign-In response received');
       console.log('Credential:', credentialResponse.credential ? 'Present' : 'Missing');
 
-      // Validate response
       if (!credentialResponse.credential) {
         throw new Error('No credential received from Google. Please try again.');
       }
 
       console.log('📤 Sending credential to backend...');
 
-      // Send credential (JWT token) to backend
       await googleLogin(credentialResponse.credential);
 
       console.log('✅ Google login successful!');
       console.log('🔄 Redirecting to dashboard...');
 
-      // Redirect to dashboard
       navigate('/dashboard', { replace: true });
 
     } catch (err) {
       console.error('❌ Google login failed:', err);
+      console.error('Error response:', err.response);
+      console.error('Error response data:', err.response?.data);
 
-        // ✅ FIXED: Comprehensive error message extraction
-    let errorMessage = 'Google sign-in failed. Please try again.';
+      let errorMessage = 'Google sign-in failed. Please try again.';
 
-    console.log('🔍 Error object:', err);
-    console.log('🔍 Error response:', err.response);
-    console.log('🔍 Error response data:', err.response?.data);
+      if (err.response?.data) {
+        const data = err.response.data;
+        console.log('📋 Google error data type:', typeof data);
+        console.log('📋 Google error data:', data);
 
-    // Try to extract from error object
-    if (err.response?.data) {
-      const data = err.response.data;
-
-      if (typeof data === 'string') {
-        errorMessage = data;
-      } else if (data.mobile_number) {
-        // Mobile number validation error
-        errorMessage = Array.isArray(data.mobile_number) 
-          ? data.mobile_number[0] 
-          : data.mobile_number;
-      } else if (data.error) {
-        errorMessage = data.error;
-      } else if (data.message) {
-        errorMessage = data.message;
-      } else if (data.detail) {
-        errorMessage = data.detail;
-      } else if (data.non_field_errors) {
-        errorMessage = Array.isArray(data.non_field_errors)
-          ? data.non_field_errors[0]
-          : data.non_field_errors;
-      } else if (typeof data === 'object') {
-        // Get first error from object
-        const entries = Object.entries(data);
-        if (entries.length > 0) {
-          const [key, value] = entries[0];
-          const msg = Array.isArray(value) ? value[0] : value;
-          errorMessage = `${key}: ${msg}`;
+        if (typeof data === 'string') {
+          errorMessage = data;
+        } else if (data.mobile_number) {
+          // Mobile number required error
+          const msg = Array.isArray(data.mobile_number) ? data.mobile_number[0] : data.mobile_number;
+          errorMessage = msg;
+        } else if (data.error) {
+          errorMessage = data.error;
+        } else if (data.detail) {
+          errorMessage = data.detail;
+        } else if (data.message) {
+          errorMessage = data.message;
+        } else if (data.non_field_errors) {
+          const msg = Array.isArray(data.non_field_errors) ? data.non_field_errors[0] : data.non_field_errors;
+          errorMessage = msg;
+        } else if (typeof data === 'object') {
+          // Get first error from any field
+          const keys = Object.keys(data);
+          if (keys.length > 0) {
+            const firstKey = keys[0];
+            const firstValue = data[firstKey];
+            const msg = Array.isArray(firstValue) ? firstValue[0] : firstValue;
+            
+            // Make it user-friendly
+            if (typeof msg === 'string') {
+              errorMessage = msg;
+            } else {
+              errorMessage = `${firstKey}: ${JSON.stringify(msg)}`;
+            }
+          }
         }
+      } else if (err.message) {
+        errorMessage = err.message;
+      } else if (typeof err === 'string') {
+        errorMessage = err;
       }
-    } else if (err.message) {
-      errorMessage = err.message;
-    } else if (typeof err === 'string') {
-      errorMessage = err;
-    }
 
-    console.error('📝 Displaying error:', errorMessage);
-    setError(errorMessage);
+      console.error('📝 Final Google error:', errorMessage);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
   /**
-   * ✅ FIXED: Handle Google OAuth Error
-   * Using @react-oauth/google error format
+   * Handle Google OAuth Error
    */
   const handleGoogleError = () => {
     console.error('❌ Google Sign-In failed');
@@ -298,7 +309,7 @@ const Login = () => {
           <span>or</span>
         </div>
 
-        {/* Google OAuth - Modern @react-oauth/google */}
+        {/* Google OAuth */}
         <div className="google-signin">
           <GoogleLogin
             onSuccess={handleGoogleSuccess}
