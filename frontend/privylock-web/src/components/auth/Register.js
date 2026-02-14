@@ -87,8 +87,42 @@ const Register = () => {
       setShowRecoveryKey(true);
 
     } catch (err) {
-      console.error('❌ Registration failed:', err);
-      setError(err.message || 'Registration failed. Please try again.');
+  console.error('❌ Registration failed:', err);
+  console.error('Full error:', JSON.stringify(err, null, 2));
+  
+  // ✅ FIXED: Extract error message properly
+  let errorMessage = 'Registration failed. Please try again.';
+  
+  if (err.response?.data) {
+    const data = err.response.data;
+    console.log('Error data:', data);
+    
+    if (typeof data === 'string') {
+      errorMessage = data;
+    } else if (data.error) {
+      errorMessage = data.error;
+    } else if (data.detail) {
+      errorMessage = data.detail;
+    } else if (data.message) {
+      errorMessage = data.message;
+    } else if (data.errors) {
+      // Handle Django validation errors
+      const firstError = Object.values(data.errors)[0];
+      if (Array.isArray(firstError)) {
+        errorMessage = firstError[0];
+      } else {
+        errorMessage = String(firstError);
+      }
+    } else {
+      // Last resort: stringify the object
+      errorMessage = JSON.stringify(data);
+    }
+  } else if (err.message) {
+    errorMessage = err.message;
+  }
+  
+  console.error('📝 Displaying error:', errorMessage);
+  setError(errorMessage);
     } finally {
       setLoading(false);
     }

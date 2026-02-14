@@ -68,6 +68,9 @@ def register(request):
     ✅ NO AUTO-LOGIN! User must verify email and login manually.
     """
     try:
+        # ✅ ADD: Log incoming request
+        logger.info(f"📝 Registration attempt for: {request.data.get('email')}")
+        
         serializer = UserRegistrationSerializer(
             data=request.data,
             context={'request': request}
@@ -79,14 +82,16 @@ def register(request):
 
             logger.info(f"✅ New user registered: {user.email}")
 
-            # Send verification email
+            # ✅ FIXED: Capture return value from send_verification_email
             try:
-                send_verification_email(user, user.email_verification_token)
-                logger.info(f"📧 Verification email sent to: {user.email}")
-                if not email_sent:
+                email_sent = send_verification_email(user, user.email_verification_token)
+                if email_sent:
+                    logger.info(f"📧 Verification email sent to: {user.email}")
+                else:
                     logger.warning(f"⚠️ Email not sent but registration completed for {user.email}")
             except Exception as e:
                 logger.error(f"❌ Failed to send verification email: {e}")
+                # Don't fail registration if email fails
 
             return Response({
                 'success': True,
@@ -96,19 +101,23 @@ def register(request):
                 'message': 'Registration successful. Please check your email to verify your account, then login.'
             }, status=status.HTTP_201_CREATED)
 
-        # Return validation errors
-        logger.warning(f"❌ Registration failed: {serializer.errors}")
+        # ✅ IMPROVED: Return validation errors properly
+        logger.warning(f"❌ Registration validation failed: {serializer.errors}")
         return Response({
             'success': False,
-            'errors': serializer.errors
+            'errors': serializer.errors,
+            'error': 'Validation failed. Please check your input.'
         }, status=status.HTTP_400_BAD_REQUEST)
 
     except Exception as e:
-        # Log unexpected errors
+        # ✅ IMPROVED: Return detailed error for debugging
         logger.error(f"❌ Registration error: {str(e)}", exc_info=True)
+        
         return Response({
             'success': False,
-            'error': 'An error occurred during registration'
+            'error': 'An error occurred during registration',
+            'detail': str(e),  # ✅ Include error details
+            'type': type(e).__name__  # ✅ Include error type
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -252,7 +261,8 @@ def google_login(request):
     except Exception as e:
         logger.error(f"❌ Google OAuth error: {str(e)}", exc_info=True)
         return Response({
-            'error': 'Google authentication failed'
+            'error': 'Google authentication failed',
+            'detail': str(e)  # ✅ Add error details
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
